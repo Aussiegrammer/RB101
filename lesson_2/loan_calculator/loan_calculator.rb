@@ -53,6 +53,7 @@ loop do # Main loop
   prompt('another')
   answer = gets.chomp
 
+  system('clear') if answer == 'y' || answer == 'yes'
   break unless answer.downcase == "y" || answer.downcase == "yes"
 end
 
