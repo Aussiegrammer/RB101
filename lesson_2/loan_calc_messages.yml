@@ -1,0 +1,10 @@
+welcome: "Welcome to the loan calculator!"
+loan_amount: "Start out by entering your loan amount:"
+interest_amount: "Enter your interest rate. (For 10%, enter 10)"
+duration_amount: "Please enter the duration of your loan in years."
+calculating: "Thanks! Calculating your loan..."
+monthly_dues: "Per month, you will owe $#{monthly_payment.ceil(2).to_s}" # -- Doesn't work
+total_interest: "The total cost of your loan's interest is $#{total_payment.ceil(2).to_s}" # -- Doesn't work
+another: "Would you like to calculate again?"
+goodbye: "Thank you for using the loan calculator. Goodbye!"
+not_a_number: "Please make sure you enter a positive number!"

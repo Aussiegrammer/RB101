@@ -1,0 +1,36 @@
+# a method that returns the sum of two integers #
+
+Given two integers into the method,
+Add them together
+Return the result
+
+START 
+
+SET integers a, b
+c = a + b 
+RETURN c
+
+END
+
+# a method that takes an array of strings, and 
+returns a string that is all those strings concatenated together#
+
+Iterate through the array of strings
+Create a new string
+Concatenate each word, adding a space in between
+
+START
+
+# Given a collection of words / strings called 'words'
+
+SET iterator = 1
+SET string = ""
+
+WHILE iterator <= number of words
+  CONCATE string << word
+  iterator += 1
+  
+PRINT string
+
+END
+
