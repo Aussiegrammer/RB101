@@ -10,54 +10,41 @@ def integer?(input) # Validates integers
   input.to_i.to_s == input && input.to_i > 0
 end
 
-def float?(input) # Same as above but for floats
-  input.to_f.to_s == input && input.to_i > 0
+def float?(input) # Validates floats
+  input.to_f.to_s == input && input.to_f > 0
 end
 
-def number?(input) # Attempts both methods to confirm if a number is real
+def number?(input) # Attempts both confirmations to check if a number is real
   integer?(input) || float?(input)
+end
+
+def retrieve_input(prompt, variable) # Main method for retrieving user data
+  loop do
+    prompt(prompt)
+    variable = gets.chomp
+    
+    return variable if number?(variable)
+    prompt('not_a_number')
+  end
 end
 
 prompt('welcome')
 loop do # Main loop
-  loan = nil # Loan amount loop
-  loop do
-    prompt('loan_amount')
-    loan = gets.chomp
-
-    break if number?(loan)
-    prompt('not_a_number')
-  end
-
-  interest = nil
-  loop do # Interest amount loop
-    prompt('interest_amount')
-    interest = gets.chomp
-
-    break if number?(interest)
-    prompt('not_a_number')
-  end
-
-  years = nil
-  loop do # Monthly duration loop
-    prompt('duration_amount')
-    years = gets.chomp
-
-    break if number?(years)
-    prompt('not_a_number')
-  end
+  loan = retrieve_input('loan_prompt', loan)
+  interest = retrieve_input('interest_prompt', interest)
+  years = retrieve_input('years_prompt', years)
 
   prompt('calculating')
 
   annual_interest = interest.to_f / 100 # Convert whole integer into decimal
-  monthly_interest = annual_interest / 12
+  monthly_interest = annual_interest / 12 
   months = years.to_i * 12
 
-  monthly_payment = loan.to_i * (monthly_interest / 
+  monthly_payment = loan.to_f * (monthly_interest / 
                     (1 - (1 + monthly_interest)**(-months)))
 
   total_loan      = monthly_payment * months
-  total_payment   = monthly_payment * months - loan.to_i # Total loan payment
+  total_payment   = monthly_payment * months - loan.to_f # Total loan payment
 
   puts "=> Per month, you will owe $#{monthly_payment.ceil(2)}"
   puts "=> The total of all payments will be $#{total_loan.ceil(2)}"
@@ -66,7 +53,7 @@ loop do # Main loop
   prompt('another')
   answer = gets.chomp
 
-  break unless answer.downcase.start_with?('y')
+  break unless answer.downcase == "y" || answer.downcase == "yes"
 end
 
 prompt('goodbye')
