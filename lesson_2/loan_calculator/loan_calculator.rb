@@ -22,7 +22,7 @@ def retrieve_input(prompt, variable) # Main method for retrieving user data
   loop do
     prompt(prompt)
     variable = gets.chomp
-    
+
     return variable if number?(variable)
     prompt('not_a_number')
   end
@@ -37,10 +37,10 @@ loop do # Main loop
   prompt('calculating')
 
   annual_interest = interest.to_f / 100 # Convert whole integer into decimal
-  monthly_interest = annual_interest / 12 
+  monthly_interest = annual_interest / 12
   months = years.to_i * 12
 
-  monthly_payment = loan.to_f * (monthly_interest / 
+  monthly_payment = loan.to_f * (monthly_interest /
                     (1 - (1 + monthly_interest)**(-months)))
 
   total_loan      = monthly_payment * months
