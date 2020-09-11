@@ -1,5 +1,5 @@
 VALID_CHOICES = ['rock', 'paper', 'scissors', 'lizard', 'spock']
-PLAYER_SHORTCUTS = ['r', 'p', 's', 'l', 'S']
+PLAYER_SHORTCUTS = ['r', 'p', 'sc', 'l', 'sp']
 WIN_CONDITIONS = { 'rock' => ['scissors', 'lizard'],
                    'paper' => ['rock', 'spock'],
                    'scissors' => ['paper', 'lizard'],
@@ -50,9 +50,9 @@ def choice_shortcut(choice)
   case choice
   when 'r' then 'rock'
   when 'p' then 'paper'
-  when 's' then 'scissors'
+  when 'sc' then 'scissors'
   when 'l' then 'lizard'
-  when 'S' then 'spock'
+  when 'sp' then 'spock'
   end
 end
 
@@ -83,7 +83,7 @@ end
 puts "Please enter your name:"
 player_name = gets.chomp
 prompt("Welcome, #{player_name}!")
-prompt("Tip: Use shortcuts such as 'p', 's', or 'S' for Spock! Case sensitive!")
+prompt("Tip: Use shortcuts such as 'p', 'sc', or 'sp' for Spock!")
 
 loop do # Main game loop
   choice = nil
@@ -93,7 +93,7 @@ loop do # Main game loop
   loop do # First to 5 loop
     loop do # Player input loop
       prompt("Choose one: #{VALID_CHOICES.join(', ')}")
-      choice = gets.chomp
+      choice = gets.chomp.downcase
 
       if VALID_CHOICES.include?(choice)
         break
