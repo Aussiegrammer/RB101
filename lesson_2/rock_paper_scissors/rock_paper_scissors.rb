@@ -1,10 +1,10 @@
 VALID_CHOICES = ['rock', 'paper', 'scissors', 'lizard', 'spock']
 PLAYER_SHORTCUTS = ['r', 'p', 's', 'l', 'S']
-WIN_CONDITIONS = { 'rock'     => ['scissors', 'lizard'],
-                   'paper'    => ['rock', 'spock'],
+WIN_CONDITIONS = { 'rock' => ['scissors', 'lizard'],
+                   'paper' => ['rock', 'spock'],
                    'scissors' => ['paper', 'lizard'],
-                   'lizard'   => ['spock', 'paper'],
-                   'spock'    => ['scissors', 'rock'] }
+                   'lizard' => ['spock', 'paper'],
+                   'spock' => ['scissors', 'rock'] }
 
 def prompt(message)
   puts "=> #{message}"
@@ -56,23 +56,34 @@ def choice_shortcut(choice)
   end
 end
 
-def new_game?
-  loop do 
+def new_game_prompt
+  valid_answer = ['y', 'yes', 'n', 'no']
+  answer = nil
+  loop do
     prompt("Do you want to play again?")
     answer = gets.chomp
-    if answer.downcase == "y" || answer.downcase == "yes"
-      true
-    elsif answer.downcase == "n" || answer.downcase == "no" 
-      false
-    else 
-    prompt("Sorry, please enter yes or no.")
+    if valid_answer.include?(answer.downcase)
+      break
+    else
+      prompt("Sorry, please enter yes or no.")
     end
+  end
+  answer
+end
+
+def new_game?
+  answer = new_game_prompt
+  if answer.downcase == "y" || answer.downcase == "yes"
+    true
+  elsif answer.downcase == "n" || answer.downcase == "no"
+    false
   end
 end
 
 puts "Please enter your name:"
 player_name = gets.chomp
-puts "Welcome, #{player_name}! Tip: Use shortcuts such as 'p', 's', or 'S'!"
+prompt("Welcome, #{player_name}!")
+prompt("Tip: Use shortcuts such as 'p', 's', or 'S' for Spock!")
 
 loop do # Main game loop
   choice = nil
@@ -107,7 +118,10 @@ loop do # Main game loop
 
     break if player_score == 5 || computer_score == 5
   end
-  
+
   break unless new_game?
   system('clear') || system('cls')
 end
+
+prompt("Thanks for playing! Any key to exit.")
+gets
