@@ -83,7 +83,7 @@ end
 puts "Please enter your name:"
 player_name = gets.chomp
 prompt("Welcome, #{player_name}!")
-prompt("Tip: Use shortcuts such as 'p', 's', or 'S' for Spock!")
+prompt("Tip: Use shortcuts such as 'p', 's', or 'S' for Spock! Case sensitive!")
 
 loop do # Main game loop
   choice = nil
