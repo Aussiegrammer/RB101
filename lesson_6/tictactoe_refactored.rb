@@ -1,4 +1,3 @@
-
 INITIAL_MARKER = ' '
 PLAYER_MARKER = 'X'
 COMPUTER_MARKER = 'O'
@@ -14,24 +13,22 @@ def prompt(msg)
 end
 
 def settings_first_move
-  valid_answer = FIRST_MOVE[0..1]
   answer = ''
   loop do
     prompt "Choose who goes first, #{joinor(FIRST_MOVE)}."
     answer = gets.chomp.downcase
-    break if valid_answer.include?(answer)
+    break if FIRST_MOVE[0..1].include?(answer)
     puts "Sorry, I didn't get that. Please enter #{joinor(FIRST_MOVE)}."
   end
   answer
 end
 
 def settings_ai_difficulty
-  valid_answer = AI_DIFFICULTY[0..2]
   answer = ''
   loop do
     prompt "Please choose a difficulty - #{joinor(AI_DIFFICULTY)}"
     answer = gets.chomp.downcase
-    break if valid_answer.include?(answer)
+    break if AI_DIFFICULTY[0..2].include?(answer)
     puts "Sorry, I didn't get that. Please enter #{joinor(AI_DIFFICULTY)}."
   end
   case answer
@@ -61,7 +58,8 @@ end
 
 def display_scoreboard(round, scores)
   puts "Round #{round} | " \
-       "Player score = #{scores[0]} | Computer score = #{scores[1]}"
+       "Player score = #{scores[:player]} | " \
+       "Computer score = #{scores[:computer]}"
 end
 
 def initialise_board
@@ -88,14 +86,23 @@ end
 
 def player_places_piece!(board)
   square = ''
+  valid_input = %w(1 2 3 4 5 6 7 8 9)
   loop do
     prompt "Choose a square (#{joinor(empty_squares(board))})"
-    square = gets.to_i
-    break if empty_squares(board).include?(square)
-    prompt "Sorry, that's not a valid choice"
+    square = gets.chomp
+    unless valid_input.include?(square)
+      invalid_choice
+      next
+    end
+    break if empty_squares(board).include?(square.to_i)
+    invalid_choice
   end
 
-  board[square] = PLAYER_MARKER
+  board[square.to_i] = PLAYER_MARKER
+end
+
+def invalid_choice
+  prompt "Sorry, that's not a valid choice"
 end
 
 def computer_ai_defense_check(board)
@@ -189,22 +196,45 @@ def detect_round_winner(board)
 end
 
 def detect_game_winner(scores)
-  if scores[0] == WINNING_SCORE
+  if scores[:player] == WINNING_SCORE
     'Player'
-  elsif scores[1] == WINNING_SCORE
+  elsif scores[:computer] == WINNING_SCORE
     'Computer'
   end
+end
+
+def display_round_winner(board)
+  puts "#{detect_round_winner(board)} wins the round! " \
+       "Point to #{detect_round_winner(board)}."
+end
+
+def display_tie
+  puts "It's a tie!"
+end
+
+def increment_by_one(round)
+  round += 1
+  round
+end
+
+def enter_to_continue_round(scores)
+  prompt "Press Enter for the next round." unless someone_won_game?(scores)
+  gets.chomp unless someone_won_game?(scores)
 end
 
 def someone_won_game?(scores)
   !!detect_game_winner(scores)
 end
 
+def display_grand_winner(scores)
+  puts "#{detect_game_winner(scores)} wins the game!"
+end
+
 def add_score(winner, scores)
   if winner == 'Player'
-    scores[0] += 1
+    scores[:player] += 1
   else
-    scores[1] += 1
+    scores[:computer] += 1
   end
   scores
 end
@@ -226,20 +256,17 @@ end
 
 def new_game?
   answer = yes_no_prompt("Would you like to play again?")
-  if answer.downcase == "y" || answer.downcase == "yes"
-    true
-  elsif answer.downcase == "n" || answer.downcase == "no"
-    false
-  end
+  answer.downcase.start_with?('y')
 end
 
 def change_settings_prompt?
   answer = yes_no_prompt("Do you want to try new settings?")
-  if answer.downcase == "y" || answer.downcase == "yes"
-    true
-  elsif answer.downcase == "n" || answer.downcase == "no"
-    false
-  end
+  answer.downcase.start_with?('y')
+end
+
+def display_goodbye
+  system('clear') || system('cls')
+  prompt "Thanks for playing Tic Tac Toe!"
 end
 
 prompt "Welcome to Tic Tac Toe! First to #{WINNING_SCORE} wins the game."
@@ -254,7 +281,7 @@ loop do # Main game loop
     ai_difficulty = settings_ai_difficulty
   end
 
-  scores = [0, 0] # Player, computer
+  scores = { player: 0, computer: 0 }
   round = 1
 
   loop do
@@ -266,28 +293,24 @@ loop do # Main game loop
 
     loop do
       if someone_won_round?(board)
-        puts "#{detect_round_winner(board)} wins the round! " \
-             "Point to #{detect_round_winner(board)}."
+        display_round_winner(board)
         scores = add_score(detect_round_winner(board), scores)
       else
-        puts "It's a tie!"
+        display_tie
       end
       display_scoreboard(round, scores)
-      prompt "Press Enter for the next round." unless someone_won_game?(scores)
-      gets.chomp unless someone_won_game?(scores)
+      enter_to_continue_round(scores)
       break
     end
 
-    round += 1
+    round = increment_by_one(round)
 
-    if someone_won_game?(scores)
-      puts "#{detect_game_winner(scores)} wins the game!"
-      break
-    end
+    break if someone_won_game?(scores)
   end
+  display_grand_winner(scores) if someone_won_game?(scores)
+
   break unless new_game?
   change_settings = change_settings_prompt?
 end
 
-system('clear') || system('cls')
-prompt "Thanks for playing Tic Tac Toe!"
+display_goodbye
