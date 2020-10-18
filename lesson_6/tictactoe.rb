@@ -16,10 +16,10 @@ def settings_first_move
   valid_answer = FIRST_MOVE[0..1]
   answer = ''
   loop do
-    prompt "Choose who goes first, player or computer."
+    prompt "Choose who goes first, #{joinor(FIRST_MOVE)}."
     answer = gets.chomp.downcase
     break if valid_answer.include?(answer)
-    puts "Sorry, I didn't get that. Please enter player or computer."
+    puts "Sorry, I didn't get that. Please enter #{joinor(FIRST_MOVE)}."
   end
   answer
 end
@@ -28,10 +28,10 @@ def settings_ai_difficulty
   valid_answer = AI_DIFFICULTY[0..2]
   answer = ''
   loop do
-    prompt "Please choose a difficulty - Easy, medium, or hard."
+    prompt "Please choose a difficulty - #{joinor(AI_DIFFICULTY)}"
     answer = gets.chomp.downcase
     break if valid_answer.include?(answer)
-    puts "Sorry, I didn't get that. Please enter easy, medium or hard."
+    puts "Sorry, I didn't get that. Please enter #{joinor(AI_DIFFICULTY)}."
   end
   case answer
   when 'easy' then 0
@@ -73,14 +73,15 @@ def empty_squares(board)
   board.keys.select { |num| board[num] == INITIAL_MARKER }
 end
 
-def joinor(squares, delimiter = ', ', word = 'or')
-  case squares.size
+def joinor(array, delimiter = ', ', word = 'or')
+  case array.size
   when 0 then ''
-  when 1 then squares.first
-  when 2 then squares.join(" #{word} ")
+  when 1 then array.first
+  when 2 then array.join(" #{word} ")
   else
-    last = squares.pop
-    squares.join(delimiter) + ", #{word} " + last.to_s
+    last = array.last
+    temp_array = array[0..-2]
+    temp_array.join(delimiter) + "#{(delimiter)}#{word} " + last.to_s
   end
 end
 
