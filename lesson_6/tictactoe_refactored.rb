@@ -285,6 +285,7 @@ loop do # Main game loop
   round = 1
 
   loop do
+    system('clear') || system('cls')
     board = initialise_board
     current_player = first_move
     game_round(board, round, scores, current_player, ai_difficulty)
