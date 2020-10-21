@@ -248,6 +248,8 @@ end
 
 system('clear') || system('cls')
 puts "Welcome to Twenty-One! First to five rounds wins the game!"
+prompt "Please press Enter to begin."
+gets.chomp
 
 loop do # Main Game Loop
   scores = { player: 0, dealer: 0 }
@@ -265,7 +267,7 @@ loop do # Main Game Loop
 
     current_turn = 'player'
     display_hands(player_hand, dealer_hand, p_total, d_total, current_turn)
-    player_turn(deck, player_hand, dealer_hand, p_total, d_total, current_turn)
+    player_turn(deck, player_hand, dealer_hand, p_total, d_total)
 
     p_total = convert_hand_to_points(player_hand)
     if busted?(p_total)
