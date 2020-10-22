@@ -1,9 +1,6 @@
-FULL_DECK = {
-  Hearts: [2, 3, 4, 5, 6, 7, 8, 9, 10, 'Jack', 'Queen', 'King', 'Ace'],
-  Diamonds: [2, 3, 4, 5, 6, 7, 8, 9, 10, 'Jack', 'Queen', 'King', 'Ace'],
-  Clubs: [2, 3, 4, 5, 6, 7, 8, 9, 10, 'Jack', 'Queen', 'King', 'Ace'],
-  Spades: [2, 3, 4, 5, 6, 7, 8, 9, 10, 'Jack', 'Queen', 'King', 'Ace']
-}
+SUITS = ['Hearts', 'Diamonds', 'Clubs', 'Spades']
+VALUES = [2, 3, 4, 5, 6, 7, 8, 9, 10, 'Jack', 'Queen', 'King', 'Ace']
+
 FACE_CARDS = ['Jack', 'Queen', 'King']
 DEALER_MAX = 17
 BUST_NUMBER = 22
@@ -14,30 +11,38 @@ def prompt(msg)
 end
 
 def initialise_new_deck
-  deck = []
-  FULL_DECK.each do |suit, values|
-    current_suit = suit
-    values.each do |value|
-      deck << [current_suit, value]
-    end
-  end
-  deck.shuffle
+  SUITS.product(VALUES).shuffle
 end
 
-def deal_cards!(deck, player_hand, dealer_hand)
+def deal_cards!(deck, hands)
   2.times do
-    player_hand << deck.pop
-    dealer_hand << deck.pop
+    hands[:player_cards] << deck.pop
+    hands[:dealer_cards] << deck.pop
   end
 end
 
-def deal_single_card!(deck, hand, current_turn)
+def deal_card!(deck, hands, current_turn)
+  display_single_card(deck, current_turn)
+  deal_single_card!(deck, hands, current_turn)
+end
+
+def deal_single_card!(deck, hands, current_turn)
   dealt_card = deck.pop
   if current_turn == 'player'
-    hand << dealt_card
+    hands[:player_cards] << dealt_card
     prompt "You are dealt a #{dealt_card[1]} of #{dealt_card[0]}!"
   elsif current_turn == 'dealer'
-    hand << dealt_card
+    hands[:dealer_cards] << dealt_card
+    prompt "The dealer hits and is dealt " \
+           "a #{dealt_card[1]} of #{dealt_card[0]}!"
+  end
+end
+
+def display_single_card(deck, current_turn)
+  dealt_card = deck.last
+  if current_turn == 'player'
+    prompt "You are dealt a #{dealt_card[1]} of #{dealt_card[0]}!"
+  elsif current_turn == 'dealer'
     prompt "The dealer hits and is dealt " \
            "a #{dealt_card[1]} of #{dealt_card[0]}!"
   end
@@ -55,37 +60,42 @@ def convert_hand_to_points(hand)
   card_points = 0
   card_values = get_card_values(hand)
   card_values.each do |card|
-    if FACE_CARDS.include?(card)
-      card_points += 10
-    elsif card == 'Ace'
-      card_points += 11
-    else
-      card_points += card
-    end
+    card_points += if FACE_CARDS.include?(card)
+                     10
+                   elsif card == 'Ace'
+                     11
+                   else
+                     card
+                   end
   end
 
+  correct_for_aces(card_values, card_points)
+  card_points
+end
+
+def correct_for_aces(card_values, card_points)
   card_values.select { |value| value == "Ace" }.count.times do
     card_points -= 10 if card_points > 21
   end
   card_points
 end
 
-def detect_result(player_total, dealer_total)
-  if player_total > BUST_NUMBER
+def detect_result(hands)
+  if hands[:player_total] >= BUST_NUMBER
     :player_busted
-  elsif dealer_total > BUST_NUMBER
+  elsif hands[:dealer_total] >= BUST_NUMBER
     :dealer_busted
-  elsif dealer_total < player_total
+  elsif hands[:dealer_total] < hands[:player_total]
     :player
-  elsif dealer_total > player_total
+  elsif hands[:dealer_total] > hands[:player_total]
     :dealer
   else
     :tie
   end
 end
 
-def display_winner(player_total, dealer_total)
-  result = detect_result(player_total, dealer_total)
+def display_winner(hands)
+  result = detect_result(hands)
 
   case result
   when :player_busted
@@ -101,10 +111,10 @@ def display_winner(player_total, dealer_total)
   end
 end
 
-def display_hands(p_hand, d_hand, p_total, d_total, current_turn)
+def display_hands(hands, current_turn)
   puts "===================================="
-  display_dealer_hand(d_hand, d_total, current_turn)
-  display_player_hand(p_hand, p_total)
+  display_dealer_hand(hands, current_turn)
+  display_player_hand(hands)
   puts "===================================="
 end
 
@@ -119,7 +129,7 @@ def hand_concate(hand)
   end
 end
 
-def dealer_reveals_hole_card(dealer_hand)
+def display_dealer_hole_card(dealer_hand)
   if dealer_hand[1][1] == 'Ace'
     prompt "The dealer turns over his card, " \
          "revealing an Ace of #{dealer_hand[1][0]}"
@@ -129,28 +139,27 @@ def dealer_reveals_hole_card(dealer_hand)
   end
 end
 
-def display_dealer_hand(hand, total, current_turn)
+def display_dealer_hand(hands, current_turn)
   if current_turn == 'player'
-    prompt "Dealer has: #{hand[0][1]} and an unknown card"
+    prompt "Dealer has: #{hands[:dealer_cards][0][1]} and an unknown card"
   elsif current_turn == 'dealer'
-    prompt "Dealer hand is #{hand_concate(hand)} " \
-         "worth a total of #{total}"
+    prompt "Dealer hand is #{hand_concate(hands[:dealer_cards])} " \
+         "worth a total of #{hands[:dealer_total]}"
   end
 end
 
-def display_player_hand(hand, total)
-  prompt "Your hand is #{hand_concate(hand)} " \
-       "worth a total of #{total}."
+def display_player_hand(hands)
+  prompt "Your hand is #{hand_concate(hands[:player_cards])} " \
+       "worth a total of #{hands[:player_total]}."
 end
 
-def player_turn(deck, p_hand, d_hand, p_total, d_total)
-  current_turn = 'player'
+def player_turn(deck, hands, current_turn)
   loop do
     move = player_turn_prompt
-    deal_single_card!(deck, p_hand, current_turn) if move == 'hit'
-    p_total = convert_hand_to_points(p_hand)
-    display_hands(p_hand, d_hand, p_total, d_total, current_turn)
-    break if move == 'stay' || busted?(p_total)
+    deal_card!(deck, hands, current_turn) if move == 'hit'
+    hands[:player_total] = convert_hand_to_points(hands[:player_cards])
+    display_hands(hands, current_turn)
+    break if move == 'stay' || busted?(hands[:player_total])
   end
 end
 
@@ -158,12 +167,12 @@ def player_turn_prompt
   valid_input = ['hit', 'h', 'stay', 's']
   answer = ''
   loop do
-    prompt "Would you like to hit or stay?"
+    prompt "Would you like to (h)it or (s)tay?"
     answer = gets.chomp
     break if valid_input.include?(answer.downcase)
     prompt "Sorry, please enter hit or stay."
   end
-  system('clear') || system('cls')
+  clear_screen
 
   case answer
   when 'h' then 'hit'
@@ -172,10 +181,10 @@ def player_turn_prompt
   end
 end
 
-def dealer_turn(deck, hand, total, current_turn)
-  while total <= DEALER_MAX
-    deal_single_card!(deck, hand, current_turn)
-    total = convert_hand_to_points(hand)
+def dealer_turn(deck, hands, current_turn)
+  while hands[:dealer_total] <= DEALER_MAX
+    deal_card!(deck, hands, current_turn)
+    hands[:dealer_total] = convert_hand_to_points(hands[:dealer_cards])
   end
 end
 
@@ -183,8 +192,8 @@ def busted?(total)
   true if total >= BUST_NUMBER
 end
 
-def update_scores(player_total, dealer_total, scores)
-  result = detect_result(player_total, dealer_total)
+def update_scores(hands, scores)
+  result = detect_result(hands)
   if result == :player || result == :dealer_busted
     scores[:player] += 1
   elsif result == :dealer || result == :player_busted
@@ -197,9 +206,9 @@ def display_scores(scores)
          "Dealer wins = #{scores[:dealer]}"
 end
 
-def end_round(player_total, dealer_total, scores)
-  display_winner(player_total, dealer_total)
-  update_scores(player_total, dealer_total, scores)
+def end_round(hands, scores)
+  display_winner(hands)
+  update_scores(hands, scores)
   display_scores(scores)
   enter_to_continue_round(scores)
 end
@@ -241,12 +250,17 @@ def new_game?
   answer.downcase.start_with?('y')
 end
 
-def display_goodbye
+def clear_screen
   system('clear') || system('cls')
-  prompt "Thanks for playing Twenty-One!"
 end
 
-system('clear') || system('cls')
+def display_goodbye
+  clear_screen
+  prompt "Thanks for playing Twenty-One! Press Enter to exit."
+  gets.chomp
+end
+
+clear_screen
 puts "Welcome to Twenty-One! First to five rounds wins the game!"
 prompt "Please press Enter to begin."
 gets.chomp
@@ -255,42 +269,45 @@ loop do # Main Game Loop
   scores = { player: 0, dealer: 0 }
   loop do # One Game Round
     break if grand_winner?(scores)
-    system('clear') || system('cls')
+    clear_screen
 
-    player_hand = []
-    dealer_hand = []
+    hands = { player_cards: [], dealer_cards: [],
+              player_total: 0, dealer_total: 0 }
+
     deck = initialise_new_deck
-    deal_cards!(deck, player_hand, dealer_hand)
+    deal_cards!(deck, hands)
 
-    p_total = convert_hand_to_points(player_hand)
-    d_total = convert_hand_to_points(dealer_hand)
+    hands[:player_total] = convert_hand_to_points(hands[:player_cards])
+    hands[:dealer_total] = convert_hand_to_points(hands[:dealer_cards])
 
     current_turn = 'player'
-    display_hands(player_hand, dealer_hand, p_total, d_total, current_turn)
-    player_turn(deck, player_hand, dealer_hand, p_total, d_total)
+    display_hands(hands, current_turn)
+    player_turn(deck, hands, current_turn)
 
-    p_total = convert_hand_to_points(player_hand)
-    if busted?(p_total)
-      end_round(p_total, d_total, scores)
+    hands[:player_total] = convert_hand_to_points(hands[:player_cards])
+    if busted?(hands[:player_total])
+      end_round(hands, scores)
       next
     end
 
-    system('clear') || system('cls')
-    display_dealer_hand(dealer_hand, d_total, current_turn)
+    clear_screen
+    display_dealer_hand(hands, current_turn)
     current_turn = 'dealer'
-    dealer_reveals_hole_card(dealer_hand)
-    dealer_turn(deck, dealer_hand, d_total, current_turn)
+    display_dealer_hole_card(hands[:dealer_cards])
+    dealer_turn(deck, hands, current_turn)
 
-    d_total = convert_hand_to_points(dealer_hand)
-    if busted?(d_total)
-      end_round(p_total, d_total, scores)
+    hands[:dealer_total] = convert_hand_to_points(hands[:dealer_cards])
+    if busted?(hands[:dealer_total])
+      end_round(hands, scores)
       next
     end
 
-    display_hands(player_hand, dealer_hand, p_total, d_total, current_turn)
-    end_round(p_total, d_total, scores)
+    display_hands(hands, current_turn)
+    end_round(hands, scores)
   end
 
   display_grand_winner(scores)
   break unless new_game?
 end
+
+display_goodbye
