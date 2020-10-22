@@ -30,11 +30,8 @@ def deal_single_card!(deck, hands, current_turn)
   dealt_card = deck.pop
   if current_turn == 'player'
     hands[:player_cards] << dealt_card
-    prompt "You are dealt a #{dealt_card[1]} of #{dealt_card[0]}!"
   elsif current_turn == 'dealer'
     hands[:dealer_cards] << dealt_card
-    prompt "The dealer hits and is dealt " \
-           "a #{dealt_card[1]} of #{dealt_card[0]}!"
   end
 end
 
