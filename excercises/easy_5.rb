@@ -30,15 +30,15 @@ ascii_value('Launch School') == 1251
 ascii_value('a') == 97
 ascii_value('') == 0
 
-puts 
+puts
 
-# The time of day can be represented as the number of minutes before or after midnight. 
+# The time of day can be represented as the number of minutes before or after midnight.
 # If the number of minutes is positive, the time is after midnight. If the number of minutes is negative, the time is before midnight.
 # Write a method that takes a time using this minute-based format and returns the time of day in 24 hour format (hh:mm). Your method should work with any integer input.
 
 # PEDAC
 # Problem
-# => Explicit: 
+# => Explicit:
 # =>  - Input: integer
 # =>  - Output: String
 # =>  - Rules: Cannot use Time or Date methods
@@ -79,17 +79,17 @@ puts
 #   - If negative, 'invert' the hours and minutes operations above
 #     - For minutes, do 60 - minutes >>>> % modulo does this automatically for -integers!
 #     - For hours, do 24 - hours >>> Ended up using + hours because negative number / 60 results in a negative
-#       - Edge case: If hours == 0 and integer is negative, do not add 24. 
+#       - Edge case: If hours == 0 and integer is negative, do not add 24.
 #   - If positive, proceed normally
 # If hours or minutes are only 1 digit, add an extra digit.
 # Concatenate final string result - "hours:minutes"
 
 def get_hours(integer)
   hours = integer / 60
-    loop do 
+    loop do
       if hours >= 24
         hours -= 24
-      elsif hours <= -24 
+      elsif hours <= -24
         hours += 24
       else
         break
@@ -138,7 +138,7 @@ MINUTES_PER_DAY = HOURS_PER_DAY * MINUTES_PER_HOUR
 def time_of_day(delta_minutes)
   delta_minutes =  delta_minutes % MINUTES_PER_DAY # Integer / 1440 returns only one day's worth of ninutes
   hours, minutes = delta_minutes.divmod(MINUTES_PER_HOUR) # https://docs.ruby-lang.org/en/master/Numeric.html#method-i-divmod. Returns an array with n / x, and n % x >> [a, b]
-  format('%02d:%02d', hours, minutes) # String#format. %02d = always 2 digits, hours, minutes. This adds the extra 0
+  format('%02d:%02d', hours, minutes) # Kernel#format. %02d = always 2 digits, hours, minutes. This adds the extra 0
 end
 
 p time_of_day(1000)
@@ -217,7 +217,7 @@ p word_sizes("What's up doc?") == { 6 => 1, 2 => 1, 4 => 1 }
 p word_sizes('') == {}
 
 
-# LS Way: 
+# LS Way:
 
 def word_sizes(words_string)
   counts = Hash.new(0) # Default value of non existing keys is now 0, allowing you to += 1
@@ -230,14 +230,14 @@ end
 puts
 
 # Given a string that consists of some words (all lowercased) and an assortment of non-alphabetic characters,
-# write a method that returns that string with all of the non-alphabetic characters replaced by spaces. 
+# write a method that returns that string with all of the non-alphabetic characters replaced by spaces.
 # If one or more non-alphabetic characters occur in a row, you should only have one space in the result (the result should never have consecutive spaces).
 
 ALPHABET = ("a".."z").to_a
 
 def cleanup(string)
   cleaned_string = []
-  
+
   string.each_char do |character|
     if ALPHABET.include?(character)
       cleaned_string << character
@@ -257,3 +257,146 @@ def cleanup(text)
   text.gsub(/[^a-z]/i, ' ').squeeze(' ') # Squeeze removes the duplicate spaces, the regexp turns anything that isn't a-z to a space
 end
 
+puts
+
+# Write a method that takes a string with one or more space separated words and returns a hash that shows the number of words of different sizes.
+
+# Create an empty hash
+# Split up the string into words seperated into spaces
+# Count the characters in each word into n
+# Check if n exists already in the hash
+# If it doesn't, add n into the hash as a key with the value of 1
+# If it does, increment the key n by 1 in the hash
+
+def word_sizes(string)
+  word_sizes = {}
+  string.split(' ').each do |word|
+    count = word.chars.length
+    if word_sizes.has_key?(count)
+      word_sizes[count] += 1
+    else
+      word_sizes[count] = 1
+    end
+  end
+  word_sizes
+end
+
+# LS Alternative
+
+def word_sizes(words_string)
+  counts = Hash.new(0) # Creates a hash with a default value of 0 for all new keys, instead of 'nil'. This allows us to increment by 1 right away for all new keys.
+  words_string.split.each do |word|
+    counts[word.size] += 1
+  end
+  counts
+end
+
+p word_sizes('Four score and seven.') == { 3 => 1, 4 => 1, 5 => 1, 6 => 1 }
+p word_sizes('Hey diddle diddle, the cat and the fiddle!') == { 3 => 5, 6 => 1, 7 => 2 }
+p word_sizes("What's up doc?") == { 6 => 1, 2 => 1, 4 => 1 }
+p word_sizes('') == {}
+puts
+
+# Modify the word_sizes method from the previous exercise to exclude non-letters when determining word size. For instance, the length of "it's" is 3, not 4
+
+def word_sizes(words_string)
+  counts = Hash.new(0) # Creates a hash with a default value of 0 for all new keys, instead of 'nil'. This allows us to increment by 1 right away for all new keys.
+  words_string.split.each do |word|
+    counts[word.gsub(/[^0-9a-zA-Z]/, "").size] += 1
+  end
+  counts
+end
+
+p word_sizes('Four score and seven.') == { 3 => 1, 4 => 1, 5 => 2 }
+p word_sizes('Hey diddle diddle, the cat and the fiddle!') == { 3 => 5, 6 => 3 }
+p word_sizes("What's up doc?") == { 5 => 1, 2 => 1, 3 => 1 }
+p word_sizes('') == {}
+
+puts
+
+# Write a method that takes an Array of Integers between 0 and 19, and returns an Array of those Integers sorted based on the English words for each number:
+
+NUMBER_WORDS = %w(zero, one, two, three, four, five, six, seven, eight, nine, ten, eleven, twelve, thirteen, fourteen, fifteen, sixteen, seventeen, eighteen, nineteen)
+
+def alphabetic_number_sort(numbers)
+  numbers.sort_by { |number| NUMBER_WORDS[number] }
+end
+
+def alphabetic_number_sort(numbers)
+  NUMBER_WORDS[numbers.first..numbers.last].sort.map { |num| NUMBER_WORDS.index num }
+end
+
+p alphabetic_number_sort((0..19).to_a) == [
+  8, 18, 11, 15, 5, 4, 14, 9, 19, 1, 7, 17,
+  6, 16, 10, 13, 3, 12, 2, 0
+]
+
+puts
+# Write a method that takes a string argument and returns a new string that contains the value of the original string with
+# all consecutive duplicate characters collapsed into a single character. You may not use String#squeeze or String#squeeze!.
+
+def crunch(string)
+  index = 0
+  crunched_string = ''
+  while index <= string.length - 1
+    crunched_string << string[index] unless string[index] == crunched_string[-1]
+    index += 1
+  end
+  crunched_string
+end
+
+
+p crunch('ddaaiillyy ddoouubbllee')  == 'daily double'
+p crunch('4444abcabccba') == '4abcabcba'
+p crunch('ggggggggggggggg') == 'g'
+p crunch('a') == 'a'
+p crunch('') == ''
+puts
+
+# Write a method that will take a short line of text, and print it within a box.
+
+def print_in_box(string)
+  box_length = string.length + 2
+  box_border = '-' * box_length
+  box_space = ' ' * box_length
+  puts '+' + box_border + '+'
+  puts '|' + box_space + '|'
+  puts '|' + ' ' + string + ' ' + '|'
+  puts '|' + box_space + '|'
+  puts '+' + box_border + '+'
+end
+
+# Using cleaner code / LS Solution
+
+def print_in_box(string)
+  horizontal_border = "+#{'-' * (string.size + 2)}+"
+  empty_line = "|#{' ' * (string.size + 2)}|"
+
+  puts horizontal_border
+  puts empty_line
+  puts "| #{string} |"
+  puts empty_line
+  puts horizontal_border
+end
+
+print_in_box('To boldly go where no one has gone before.')
+print_in_box('')
+puts
+
+
+# Given the method's implementation, will the returned string be the same object as the one passed in as an argument or a different object?
+
+def spin_me(str)
+  str.split.each do |word|
+    word.reverse!
+  end.join(" ")
+end
+
+# New object, as split creates an array object
+
+a = "hello world"
+p a.object_id
+
+b = spin_me(a) # "olleh dlrow"
+
+p b.object_id
